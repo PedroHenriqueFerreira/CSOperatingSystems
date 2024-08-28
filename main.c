@@ -5,8 +5,8 @@
 /*
 [pronto]
 1.0 - Crie um programa em C que implemente os algoritmos de escalonamento [pronto]
-    1.1 - RM (Rate Monotonic) [pronto]
-    1.2 - EDF (Earliest Deadline First) [pronto]
+    1.1 - RM (RM) [pronto]
+    1.2 - EDF (EDF) [pronto]
 2.0 - O programa também deve fazer os testes de escalonabilidade [pronto]
 3.0 - mostrar uma escala de tempo de execução [pronto]
     3.1 - (Semelhantes aos Slides de Aula) grafico em python [opcional][pronto].
@@ -67,8 +67,8 @@ float get_sum(){
     return sum;
 }
 
-// Checa a escalonabilidade do Rate Monotonic
-int check_RM_scalability(){
+// Checa a escalonabilidade do RM
+bool check_RM_scalability(){
     float sum = get_sum();
 
     float test = tasks_number * (pow(2, 1.0 / tasks_number) - 1);
@@ -78,8 +78,8 @@ int check_RM_scalability(){
     return FALSE;
 }
 
-// Checa a escalonabilidade do Earliest Deadline First
-int check_EDF_scalability(){
+// Checa a escalonabilidade do EDF
+bool check_EDF_scalability(){
     float sum = get_sum();
 
     if (sum <= 1) return TRUE;
@@ -87,10 +87,8 @@ int check_EDF_scalability(){
     return FALSE;
 }
 
-// Rate Monotonic
-void RM(int scalability) {
-    if(scalability == FALSE) return;
-
+// RM
+void RM() {
     // Aloca memória para as tarefas escalonadas
     tasks_scheduled_RM = malloc(simulation_time * sizeof(int));
 
@@ -111,9 +109,6 @@ void RM(int scalability) {
 
         // Se a tarefa atual não é nula
         if (task_now != NULL) {
-            // Salva no arquivo de saída o algoritmo, o tempo e a tarefa
-            // fprintf(output_file, "RM\t%d\t%d\n", time + 1, task_now->id);
-
             // Salva na lista de tarefas escalonadas a tarefa atual
             tasks_scheduled_RM[time] = task_now->id;
 
@@ -128,19 +123,14 @@ void RM(int scalability) {
                 task_now->remaining_c_in_p = task_now->C;
             }
         } else {
-            // Se a tarefa atual é nula, salva no arquivo de saída o algoritmo, o tempo e -1
-            // fprintf(output_file, "RM\t%d\t-1\n", time+1);
-
             // Salva na lista de tarefas escalonadas -1
             tasks_scheduled_RM[time] = -1;
         }
     }
 }
 
-// Earliest Deadline First
-void EDF(int scalability) {
-    if(scalability == FALSE) return;
-
+// EDF
+void EDF() {
     // Aloca memória para as tarefas escalonadas
     tasks_scheduled_EDF = malloc(simulation_time * sizeof(int));
 
@@ -165,9 +155,6 @@ void EDF(int scalability) {
 
         // Se a tarefa atual não é nula
         if(task_now != NULL) {
-            // Salva no arquivo de saída o algoritmo, o tempo e a tarefa
-            // fprintf(output_file, "EDF\t%d\t%d\n", time + 1, task_now->id);
-
             // Salva na lista de tarefas escalonadas a tarefa atual
             tasks_scheduled_EDF[time] = task_now->id;
 
@@ -182,9 +169,6 @@ void EDF(int scalability) {
                 task_now->remaining_c_in_p = task_now->C;
             }
         } else {
-            // Se a tarefa atual é nula, salva no arquivo de saída o algoritmo, o tempo e -1
-            // fprintf(output_file, "EDF\t%d\t-1\n", time + 1);
-
             // Salva na lista de tarefas escalonadas -1
             tasks_scheduled_EDF[time] = -1;
         }
@@ -192,24 +176,22 @@ void EDF(int scalability) {
 }
 
 // Mostra o gráfico de tarefas escalonadas
-void print_graphic(int* tasks_scheduled) {
+void graphic(int* tasks_scheduled) {
     for (int task = 0; task < tasks_number; task++) {
         printf("t%d ", tasks[task].id);
 
         for (int time = 0; time < simulation_time; time++) {
-            if (tasks_scheduled[time] == tasks[task].id) {
-                printf("#");
-            } else {
-                printf("-");
-            }
+            printf(tasks_scheduled[time] == tasks[task].id ? "#" : "-");
         }
 
         printf("\n");
     }
+
+    printf("\n");
 }
 
 int main(int argc, char *argv[]){
-    // Verifica se o número de argumentos é menor que 3 e exibe uma mensagem de erro
+    // Verifica se o número de argumentos é menor que 2 e exibe uma mensagem de erro
     if (argc < 2) {
         fprintf(stderr, "Comando previsto: %s SistemaTestes/sistemaX.txt\n", argv[0]);
         return EXIT_FAILURE;
@@ -260,44 +242,26 @@ int main(int argc, char *argv[]){
         }
     }
 
-    // Abre o arquivo de saída
-    // FILE *output_file;
-    // output_file = fopen(argv[2], "w");
-
-    // Primeira linha do arquivo de saída
-    // fprintf(output_file, "algoritimo\ttempo\ttarefa\n");
-
-    bool scalability_RM = check_RM_scalability();
-
-    // Executa o Rate Monotonic
-    RM(scalability_RM);
-
+    // Verifica se o sistema é escalonável pelo RM
+    if (check_RM_scalability() == FALSE) printf("RM falhou no teste de escalonabilidade\n\n");
+    else printf("RM passou no teste de escalonabilidade\n\n");
+    // Executa o RM
+    RM();
     // Mostra o gráfico de tarefas escalonadas
-    if (scalability_RM == TRUE) {
-        printf("Escalonamento RM: \n");
-        print_graphic(tasks_scheduled_RM);
-    } else {
-        printf("Impossivel escalonar pelo Rate Monotonic\n");
-    }
+    printf("Escalonamento RM: \n");
+    graphic(tasks_scheduled_RM);
 
     // Reseta as tarefas para o próximo algoritmo
     reset_tasks();
 
-    bool scalability_EDF = check_EDF_scalability();
-
-    // Executa o Earliest Deadline First
-    EDF(scalability_EDF);
-
+    // Verifica se o sistema é escalonável pelo EDF
+    if (check_EDF_scalability() == FALSE) printf("EDF falhou no teste de escalonabilidade\n\n");
+    else printf("EDF passou no teste de escalonabilidade\n\n");
+    // Executa o EDF
+    EDF();
     // Mostra o gráfico de tarefas escalonadas
-    if (scalability_EDF == TRUE) {
-        printf("Escalonamento EDF: \n");
-        print_graphic(tasks_scheduled_EDF);
-    } else {
-        printf("Impossivel escalonar pelo Earliest Deadline First\n");
-    }
-
-    // Fecha o arquivo de saída
-    // fclose(output_file);
+    printf("Escalonamento EDF: \n");
+    graphic(tasks_scheduled_EDF);
 
     return 0;
 }

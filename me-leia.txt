@@ -1,0 +1,20 @@
+o Makefile assume a seguinte estrutura de arquivos:
+
+|--Output
+|--Plots
+|--SistemasTestes
+|  |--sistema1.txt
+|  |--sistema2.txt
+|  |--sistema3.txt
+|  |--sistema4.txt
+|  |--sistema5.txt
+|--main.c
+|--Makefile
+|--me-leia.txt
+
+com o teminal no diretorio principal dê o comando "make", um csv com os resultados de cada sistema
+deve aparecer na pasta Output.
+
+eu planejo deixar no Makefile um script em python para gerar um grafico para cada resultados, mas
+o bom funcionamento dependeria do professor ter o python instalado com a biblioteca matplotlib eu
+vou apenas deixar as imagens em uma pasta separada.

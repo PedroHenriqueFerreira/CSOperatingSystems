@@ -9,7 +9,7 @@
     1.2 - EDF (EDF) [pronto]
 2.0 - O programa também deve fazer os testes de escalonabilidade [pronto]
 3.0 - mostrar uma escala de tempo de execução [pronto]
-    3.1 - (Semelhantes aos Slides de Aula) grafico em python [opcional][pronto].
+    3.1 - (Semelhantes aos Slides de Aula) grafico [pronto].
 4.0 - O programa deve ler o sitema de um arquivo .txt [pronto]
     4.1 - períodos [pronto],
     2.2 - tempos de execução no pior caso [pronto]
@@ -50,14 +50,34 @@ int* tasks_scheduled_RM;
 int* tasks_scheduled_EDF;
 
 // Reseta as tarefas para o próximo algoritmo
-void reset_tasks(){
+void reset_tasks() {
     for(int i = 0; i < tasks_number; i++){
         tasks[i] = tasks_original[i]; 
     }
 }
 
+// Calcula o MDC de dois números
+int mdc(int a, int b) {
+    if (b == 0) return a;
+    return mdc(b, a % b);
+}
+
+// Calcula o MMC de dois números
+int mmc(int a, int b) {
+    return a * b / mdc(a, b);
+}
+
+// Calcula o tempo de simulação
+void compute_simulation_time() {
+    simulation_time = tasks[0].P;
+
+    for(int i = 1; i < tasks_number; i++){
+        simulation_time = mmc(simulation_time, tasks[i].P);
+    }
+}
+
 // Calcula a soma de Ci/Pi
-float get_sum(){
+float get_sum() {
     float sum = 0.0;
 
     for(int i = 0; i < tasks_number; i++){
@@ -68,7 +88,7 @@ float get_sum(){
 }
 
 // Checa a escalonabilidade do RM
-bool check_RM_scalability(){
+bool check_RM_scalability() {
     float sum = get_sum();
 
     float test = tasks_number * (pow(2, 1.0 / tasks_number) - 1);
@@ -79,7 +99,7 @@ bool check_RM_scalability(){
 }
 
 // Checa a escalonabilidade do EDF
-bool check_EDF_scalability(){
+bool check_EDF_scalability() {
     float sum = get_sum();
 
     if (sum <= 1) return TRUE;
@@ -235,12 +255,8 @@ int main(int argc, char *argv[]){
     // Armazena o número de tarefas
     tasks_number = i;
 
-    // Busca o maior período de execução para definir o tempo de simulação
-    for (int i = 0; i < tasks_number; i++) {
-        if(tasks[i].P >= simulation_time){
-            simulation_time = tasks[i].P;
-        }
-    }
+    // Calcula o tempo de simulação
+    compute_simulation_time();
 
     // Verifica se o sistema é escalonável pelo RM
     if (check_RM_scalability() == FALSE) printf("RM falhou no teste de escalonabilidade\n\n");

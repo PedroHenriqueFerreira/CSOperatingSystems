@@ -12,7 +12,7 @@ $(TARGET): main.c
 run_all: $(TARGET)
 	for i in 1 2 3 4 5; do \
 		echo "----- sistema$$i.txt -----"; \
-		./$(TARGET) SistemasTestes/sistema$$i.txt Output/sistema$$i.csv; \
+		./$(TARGET) SistemasTestes/sistema$$i.txt; \
 	done; \
 
 clean:
